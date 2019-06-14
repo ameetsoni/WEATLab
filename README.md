@@ -77,7 +77,7 @@ model trained on the Twitter corpus.
 This will perform a similar test as the Caliskan et al. paper to find assocations
  between concepts in our learned models.  You  will provide, in order
   - the name of the word embedding model (e.g., twitter, web, or wikipedia)
-  - the two *target* words (e.g, flowers and insect)
+  - the two *target* words (e.g, flowers and insects)
   - the two *attribute* words (e.g., pleasant and unpleasant)
 
 For example:
@@ -101,7 +101,7 @@ You can find the files containing the list of target/attribute words in your
 - `names_africa`
 - `names_europe`
 - `gender_f`
-- `insect`
+- `insects`
 - `unpleasant`
 - `names_female`
 - `science`
@@ -112,38 +112,19 @@ invoked as `religion` for either the attribute or target concept).
 
 When run, the program will print a warning for each word not in the word vector
 model (this varies based on data sets, particularly if your word list contains
-names).  Then, it will output the similarity scores between each pair
-of target and attributes and their differences(e.g., names_europe/pleasant vs
-names_europe/unpleasant; names_africa/pleasant vs names_africa/unpleasant).
+names).  Then, it will output the effect size for describing the relationship
+between the targets and attributes.
 
 In the example below, European names are more closely associated with pleasant
 words, while African names are more closely associated with unpleasant names.
-The values have been scaled by 100 for readability purposes; a permutation
-test is omitted from this program (but shown in the original paper).
+A permutationtest is omitted from this program (but shown in the original paper).   
+Note: Warnings are not shown for brevity.
 
   $ ./weatTest.py twitter names_europe names_africa pleasant unpleasant
-  Warning: omitting bobbie-sue, no word vector exists in the GloVe index
-  Warning: omitting sue-ellen, no word vector exists in the GloVe index
-  Warning: omitting percell, no word vector exists in the GloVe index
-  Warning: omitting everol, no word vector exists in the GloVe index
-  Warning: omitting terryl, no word vector exists in the GloVe index
-  Warning: omitting wardell, no word vector exists in the GloVe index
-  Warning: omitting lashelle, no word vector exists in the GloVe index
-  Warning: omitting temeka, no word vector exists in the GloVe index
-  Warning: omitting tameisha, no word vector exists in the GloVe index
-  Warning: omitting teretha, no word vector exists in the GloVe index
-  Warning: omitting sharise, no word vector exists in the GloVe index
-  Warning: omitting tashika, no word vector exists in the GloVe index
-  Warning: omitting lashandra, no word vector exists in the GloVe index
-  Warning: omitting shavonn, no word vector exists in the GloVe index
 
-  Positive differences mean the target correlates more with pleasant
-  Negative differences correlate more with unpleasant
-
-  Simlarity between names_europe and pleasant: 31.354
-  Simlarity between names_europe and unpleasant: 26.379
-  Difference: 4.975
-
-  Simlarity between names_africa and pleasant: 8.856
-  Simlarity between names_africa and unpleasant: 12.042
-  Difference: -3.186
+  Effect size: 1.11
+  The score is between +2.0 and -2.0.  Positive scores indicate that
+  names_europe is more associated with pleasant than names_africa.
+  Or, equivalently, names_africa is more associated with unpleasant than names_europe.
+  Negative scores have the opposite relationship.
+  Scores close to 0 indicate little no effect.

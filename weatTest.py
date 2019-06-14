@@ -10,7 +10,7 @@ permutation test for statistical significance).  You  will provide, in order
 For example:
 ./weatTest.py twitter names_europe names_africa pleasant unpleasant
 
-You can find the files containing the list of target/attribute words in your
+You can find the files containing the list of target/attribute words in the
  wordlists directory.
 Copyright (C) 2019  Ameet Soni, Swarthmore College
 Email: asoni1@swarthmore.edu
@@ -28,6 +28,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+
 from utilities import *
 import numpy as np
 import os
@@ -87,39 +88,33 @@ def main():
     if not (target1 and target2 and attribute1 and attribute2):
         return
 
-    score1a = score1b = score2a = score2b = 0
+    wrd_assoc = {}
+    diffSumT1 = diffSumT2 = 0
     print()
     for target in target1:
-        score1a += getAverageSimilarity(target, attribute1, wordlist, array, lengths)
-        score1b += getAverageSimilarity(target, attribute2, wordlist, array, lengths)
+        ta = getAverageSimilarity(target, attribute1, wordlist, array, lengths)
+        tb = getAverageSimilarity(target, attribute2, wordlist, array, lengths)
+
+        diff = ta - tb
+        diffSumT1 += diff
+        wrd_assoc[target] = diff
 
 
     for target in target2:
-        score2a += getAverageSimilarity(target, attribute1, wordlist, array, lengths)
-        score2b += getAverageSimilarity(target, attribute2, wordlist, array, lengths)
+        ta = getAverageSimilarity(target, attribute1, wordlist, array, lengths)
+        tb = getAverageSimilarity(target, attribute2, wordlist, array, lengths)
+        diff = ta - tb
+        diffSumT2 += diff
+        wrd_assoc[target] = diff
 
-    #This is not in the paper, but some adjustments to make the raw differences
-    # easier to compare
-    score1a /= len(target1)
-    score1b /= len(target1)
-    score2a /= len(target2)
-    score2b /= len(target2)
-    score1a *= 100
-    score1b *= 100
-    score2a *= 100
-    score2b *= 100
+    d = (diffSumT1/len(target1) - diffSumT2/len(target2))/np.std(list(wrd_assoc.values()))
 
-    print("Positive differences mean the target correlates more with %s" % attr1Name)
-    print("Negative differences correlate more with %s" % attr2Name)
-    print()
-
-    print("Simlarity between %s and %s: %.3f" % (target1Name, attr1Name, score1a))
-    print("Simlarity between %s and %s: %.3f" % (target1Name, attr2Name, score1b))
-    print("Difference: %.3f" % (score1a-score1b))
-    print()
-    print("Simlarity between %s and %s: %.3f" % (target2Name, attr1Name, score2a))
-    print("Simlarity between %s and %s: %.3f" % (target2Name, attr2Name, score2b))
-    print("Difference: %.3f" % (score2a-score2b))
+    print("Effect size: %.2f" % d)
+    print("The score is between +2.0 and -2.0.  Positive scores indicate that")
+    print("%s is more associated with %s than %s." % (target1Name, attr1Name, target2Name))
+    print("Or, equivalently, %s is more associated with %s than %s." % (target2Name, attr2Name, target1Name))
+    print("Negative scores have the opposite relationship.")
+    print("Scores close to 0 indicate little no effect.")
 
 
 main()
