@@ -120,7 +120,7 @@ between the targets and attributes.
 
 In the example below, the test shows that European names are more closely associated with pleasant
 words, while African names are more closely associated with unpleasant names.
-A permutation test is omitted from this program (but shown in the original paper).   
+A permutation test is omitted from this program (but shown in the original paper).
 Note: Warnings are not shown for brevity.
 
 ```
