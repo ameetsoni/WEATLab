@@ -1,8 +1,7 @@
 ## PREREQUISITE SKILLS
 
-You need to know how to use the command-line in order to run these programs.
-No programming skills are required.  These programs use `python3` and were tested
-on Ubuntu systems.
+This lab assignment requires familiarity with using the command-line in order to run programs.
+No programming skills are required.  The provided programs use `python3` and utilize the numpy library.
 
 -------------
 
@@ -119,7 +118,7 @@ model (this varies based on data sets, particularly if the word list contains
 names).  The program outputs the effect size for describing the relationship
 between the targets and attributes.
 
-In the example below, European names are more closely associated with pleasant
+In the example below, the test shows that European names are more closely associated with pleasant
 words, while African names are more closely associated with unpleasant names.
 A permutation test is omitted from this program (but shown in the original paper).   
 Note: Warnings are not shown for brevity.
