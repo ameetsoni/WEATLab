@@ -1,3 +1,10 @@
+This lab was developed as part of a Digital Humanities Curricular Development Grant at Swarthmore College.
+The assignment was part of Ethics and Technology - a first-year seminar.
+Additional materials, including assignment details, lecture slides, and a course syllabus are available here:
+
+https://works.swarthmore.edu/dev-dhgrants/28/
+https://works.swarthmore.edu/dev-dhgrants/27/
+
 ## PREREQUISITE SKILLS
 
 This lab assignment requires familiarity with using the command-line in order to run programs.
