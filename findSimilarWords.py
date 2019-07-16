@@ -53,4 +53,5 @@ def main():
     for i in range(1, len(sim_words)):
         print("%10s %10.3f" % (sim_words[i]))
 
-main()
+if __name__ == "__main__":
+    main()

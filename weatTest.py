@@ -11,7 +11,8 @@ For example:
 ./weatTest.py twitter names_europe names_africa pleasant unpleasant
 
 You can find the files containing the list of target/attribute words in the
- wordlists directory.
+ wordlists directory.  The program also provides a visualization of the
+ similarities between the targets and attributes
 Copyright (C) 2019  Ameet Soni, Swarthmore College
 Email: asoni1@swarthmore.edu
 
@@ -34,11 +35,7 @@ import numpy as np
 import os
 import sys
 import pandas as pd
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 
 
@@ -53,6 +50,7 @@ def loadwordlist(filename, reference):
         for f in os.listdir(datadir):
             print(os.path.splitext(f)[0])
         sys.exit()
+    omits = []
     with open(datadir+filename+".txt",'r') as f:
         words = []
         for w in f.readlines():
@@ -60,7 +58,9 @@ def loadwordlist(filename, reference):
             if toInsert in reference:
                 words.append(toInsert)
             else:
-                print("Warning: omitting %s, no word vector exists in the GloVe index" % toInsert)
+                omits.append(toInsert)
+        if len(omits):
+            print("Warning: the following words from %s are not in the GloVe index: %s" % (filename, ', '.join(omits)))
     return words
 
 def getAverageSimilarity(targetVec, targetLength, attrVectors, attrLengths):
@@ -69,10 +69,12 @@ def getAverageSimilarity(targetVec, targetLength, attrVectors, attrLengths):
     return np.average([cosine_similarity(targetVec, targetLength, attrVectors[i], attrLengths[i]) for i in range(attrVectors.shape[0])])
 
 def getListData(conceptWords, allWords, allArray, allLengths):
+    """Return the GloVe Vectors and Lengths for a subset of conceptWords"""
     inds = [allWords.index(target) for target in conceptWords]
     return (allArray[inds], allLengths[inds])
 
 def rankAttributes(targetData, targetLengths, attrData, attrLengths, attrWords, n= 5):
+    """Return the n highest similarity scores between the target and all attr"""
     attrSims = [getAverageSimilarity(attrData[i], attrLengths[i], targetData, targetLengths) for i in range(attrData.shape[0])]
     return attrWords[np.argsort(attrSims)[-n:]]
 
@@ -81,17 +83,21 @@ def main():
         print("usage: weatTest.py npyFile target1file target2file attribute1file attribute2file")
         print("   e.g., weatTest.py twitter flowers insect pleasant unpleasant")
         return
+
+    #parse inputs, load in glove vectors and wordlists
     wordlist, array, lengths = load_glove_vectors(argv[1])
     target1Name = argv[2]
     target2Name = argv[3]
     attr1Name = argv[4]
     attr2Name = argv[5]
+
     target1 = loadwordlist(target1Name,wordlist)
     target2 = loadwordlist(target2Name,wordlist)
-
     attribute1 = loadwordlist(attr1Name,wordlist)
     attribute2 = loadwordlist(attr2Name,wordlist)
     if not (target1 and target2 and attribute1 and attribute2):
+        print("Error loadding one of the word lists; lists are either empty")
+        print(" or not in your learned word embedding data set")
         return
 
     target1Data, target1Lengths = getListData(target1, wordlist, array, lengths)
@@ -100,125 +106,9 @@ def main():
     attr2Data, attr2Lengths = getListData(attribute2, wordlist, array, lengths)
 
 
-    feat_cols = [ 'dim'+str(i) for i in range(target1Data.shape[1]) ]
-
-    #df = pd.DataFrame(np.concatenate([target1Data, target2Data, attr1Data, attr2Data]),columns=feat_cols)
-    #df['y'] = [target1Name]*target1Data.shape[0]+[target2Name]*target2Data.shape[0]+[attr1Name]*attr1Data.shape[0]+[attr2Name]*attr2Data.shape[0]
-    df = pd.DataFrame(np.concatenate([attr1Data, attr2Data]),columns=feat_cols)
-    df['y'] = [attr1Name]*attr1Data.shape[0]+[attr2Name]*attr2Data.shape[0]
-    df['label'] = df['y'].apply(lambda i: str(i))
-    pca = PCA(n_components=3)
-    pca.fit(df[feat_cols].values)
-    pca_result = pca.transform(df[feat_cols].values)
-    plt.figure()
-    sns.kdeplot(pca_result[df['y'] == attr1Name,0], shade=True, legend=True)
-    sns.kdeplot(pca_result[df['y'] == attr2Name,0], shade=True, legend=True)
-    plt.legend(labels=[attr1Name, attr2Name])
-    #sns.distplot(pca_result[df['y'] == attr2Name,0], hist=False, color="y", kde_kws={"shade": True})
-    #plt.show()
-
-    df = pd.DataFrame(np.concatenate([target1Data, target2Data]),columns=feat_cols)
-    df['y'] = [target1Name]*target1Data.shape[0]+[target2Name]*target2Data.shape[0]#+[attr1Name]*attr1Data.shape[0]+[attr2Name]*attr2Data.shape[0]
-    df['label'] = df['y'].apply(lambda i: str(i))
-    pca_result = pca.transform(df[feat_cols].values)
-
-
-    df['pca-one'] = pca_result[:,0]
-    df['pca-two'] = np.zeros(pca_result[:,1].shape)
-    df['pca-three'] = pca_result[:,2]
-    print('Explained variation per principal component: {}'.format(pca.explained_variance_ratio_))
-
-
-    plt.figure()
-    #sns.set(style="white", palette="muted", color_codes=True)
-    sns.kdeplot(pca_result[df['y'] == target1Name,0], shade=True, legend=True)
-    sns.kdeplot(pca_result[df['y'] == target2Name,0], shade=True, legend=True)
-    plt.legend(labels=[target1Name, target2Name])
-
-    # sns.scatterplot(
-    # x="pca-one", y="pca-two",
-    # hue="y",
-    # palette=sns.color_palette("hls", 2),
-    # data=df,
-    # legend="full",
-    # alpha=0.3
-    # )
-    #plt.show()
-    """"
-    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
-    tsne_results = tsne.fit_transform(df[feat_cols].values)
-    df['tsne-2d-one'] = tsne_results[:,0]
-    df['tsne-2d-two'] = tsne_results[:,1]
-    plt.figure(figsize=(16,10))
-    sns.scatterplot(
-    x="tsne-2d-one", y="tsne-2d-two",
-    hue="y",
-    palette=sns.color_palette("hls", 4),
-    data=df,
-    legend="full",
-    alpha=0.3
-    )
-    plt.show()
-    """
-    wrd_assoc = {}
-    diffSumT1 = diffSumT2 = 0
-    print()
-    t1a1 = []
-    t1a2 = []
-    t2a1 = []
-    t2a2 = []
-    t1diff = []
-    t2diff = []
-    for i in range(target1Data.shape[0]):
-        ta = getAverageSimilarity(target1Data[i], target1Lengths[i], attr1Data, attr1Lengths)
-        tb = getAverageSimilarity(target1Data[i], target1Lengths[i], attr2Data, attr2Lengths)
-        t1a1.append(ta)
-        t1a2.append(tb)
-        diff = ta - tb
-        t1diff.append(diff)
-        diffSumT1 += diff
-        wrd_assoc[target1[i]] = diff
-
-
-    for i in range(target2Data.shape[0]):
-        ta = getAverageSimilarity(target2Data[i], target2Lengths[i], attr1Data, attr1Lengths)
-        tb = getAverageSimilarity(target2Data[i], target2Lengths[i], attr2Data, attr2Lengths)
-        t2a1.append(ta)
-        t2a2.append(tb)
-        diff = ta - tb
-        t2diff.append(diff)
-        diffSumT2 += diff
-        wrd_assoc[target2[i]] = diff
-
-    d = (diffSumT1/len(target1) - diffSumT2/len(target2))/np.std(list(wrd_assoc.values()))
-    plt.figure()
-    feats = [target1Name+"-"+attr1Name]*len(t1a1)+[target1Name+"-"+attr2Name]*len(t1a2)+[target2Name+"-"+attr1Name]*len(t2a1) \
-      +[target2Name+"-"+attr2Name]*len(t2a2)
-    df = pd.DataFrame()
-    df["similarity"] = np.concatenate([t1a1,t1a2,t2a1,t2a2])
-    df["pairs"] = feats
-    df["target"] = [target1Name]*len(t1a1+t1a2)+[target2Name]*len(t2a1+t2a2)
-    df["attr"] = [attr1Name]*len(t1a1)+[attr2Name]*len(t1a2)+[attr1Name]*len(t2a1) +[attr2Name]*len(t2a2)
-    sns.violinplot(x="target", y="similarity", hue="attr",data=df, split=True, inner="box")
-    plt.figure()
-    feats = [target1Name]*len(t1diff) + [target2Name]*len(t2diff)
-    df = pd.DataFrame()
-    df["difference"] = np.concatenate([t1diff, t2diff])
-    df["target"] = feats
-    ax = sns.violinplot(x="target", y="difference", data=df, split=True)
-    #ax.set_ylim(-1,1)
-
-    plt.show()
-
-    print("Effect size: %.2f" % d)
-    print("The score is between +2.0 and -2.0.  Positive scores indicate that")
-    print("%s is more associated with %s than %s." % (target1Name, attr1Name, target2Name))
-    print("Or, equivalently, %s is more associated with %s than %s." % (target2Name, attr2Name, target1Name))
-    print("Negative scores have the opposite relationship.")
-    print("Scores close to 0 indicate little to no effect.")
+    #Find more similar attribute words for each target list
     print()
     print("Top 5 most similar attribute words to %s:" % target1Name)
-
     topWordsT1 = rankAttributes(target1Data, target1Lengths, np.concatenate([attr1Data, attr2Data]),
             np.concatenate([attr1Lengths, attr2Lengths]), np.concatenate([attribute1, attribute2]))
     for word in topWordsT1:
@@ -232,5 +122,84 @@ def main():
     for word in topWordsT2:
         print("\t"+word)
 
+    print()
+    #calculate similarities between target 1 and both attributes
+    targ1attr1Sims = [getAverageSimilarity(target1Data[i], target1Lengths[i], attr1Data, attr1Lengths)
+        for i in range(target1Data.shape[0])]
+    targ1attr2Sims = [getAverageSimilarity(target1Data[i], target1Lengths[i], attr2Data, attr2Lengths)
+        for i in range(target1Data.shape[0])]
+    targ1SimDiff = np.subtract(targ1attr1Sims, targ1attr2Sims)
 
-main()
+    #calculate similarities between target 2 and both attributes
+    targ2attr1Sims = [getAverageSimilarity(target2Data[i], target2Lengths[i], attr1Data, attr1Lengths)
+        for i in range(target2Data.shape[0])]
+    targ2attr2Sims = [getAverageSimilarity(target2Data[i], target2Lengths[i], attr2Data, attr2Lengths)
+        for i in range(target2Data.shape[0])]
+    targ2SimDiff = np.subtract(targ2attr1Sims, targ2attr2Sims)
+
+    #effect size is avg difference in similarities divided by standard dev
+    d = (np.average(targ1SimDiff) - np.average(targ2SimDiff))/np.std(np.concatenate((targ1SimDiff,targ2SimDiff)))
+
+
+    print()
+    print("Calculating effect size.  The score is between +2.0 and -2.0.  ")
+    print("Positive scores indicate that %s is more associated with %s than %s." % (target1Name, attr1Name, target2Name))
+    print("Or, equivalently, %s is more associated with %s than %s." % (target2Name, attr2Name, target1Name))
+    print("Negative scores have the opposite relationship.")
+    print("Scores close to 0 indicate little to no effect.")
+    print()
+    print("Effect size: %.2f" % d)
+
+    print()
+    print("Plotting similarity scores...")
+
+    fig = plt.figure(figsize=(16,8))
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    ax1.set_title("Similarities Scores for Target/Attribute Pairs")
+    ax2.set_title("Difference Scores For Each Target")
+
+    # Box plot of pairwise similarity scores
+    df = pd.DataFrame()
+    df["Similarity"] = np.concatenate([targ1attr1Sims,targ1attr2Sims,targ2attr1Sims,targ2attr2Sims])
+    df["Pairs"] = [target1Name+"-"+attr1Name]*len(targ1attr1Sims)+[target1Name+"-"+attr2Name]*len(targ1attr2Sims)+[target2Name+"-"+attr1Name]*len(targ2attr1Sims) \
+      +[target2Name+"-"+attr2Name]*len(targ2attr2Sims)
+    df["Target"] = [target1Name]*len(targ1attr1Sims+targ1attr2Sims)+[target2Name]*len(targ2attr1Sims+targ2attr2Sims)
+    df["Attribute"] = [attr1Name]*len(targ1attr1Sims)+[attr2Name]*len(targ1attr2Sims)+[attr1Name]*len(targ2attr1Sims) +[attr2Name]*len(targ2attr2Sims)
+    sns.boxplot(x="Target", y="Similarity", hue="Attribute",data=df, ax=ax1)
+    #Box plot of target bias in similarities
+    df = pd.DataFrame()
+    df["Difference"] = np.concatenate([targ1SimDiff, targ2SimDiff])
+    df["Target"] = [target1Name]*len(targ1SimDiff) + [target2Name]*len(targ2SimDiff)
+    ax = sns.boxplot(x="Target", y="Difference", data=df, ax=ax2)
+
+    ticks = ax1.get_yticks()
+    if abs(ticks[0]) > ticks[-1]: #center axis at 0
+        ax1.yaxis.set_ticks(np.linspace(ticks[0], -ticks[0]+0.1, 0.1))
+    else:
+        ax1.yaxis.set_ticks(np.arange(-ticks[-1], ticks[-1]+0.1, 0.1))
+
+    ticks = ax2.get_yticks()
+    if abs(ticks[0]) > ticks[-1]: #center axis at 0
+        ax2.yaxis.set_ticks(np.linspace(ticks[0], -ticks[0]+0.1, 0.1))
+    else:
+        ax2.yaxis.set_ticks(np.arange(-ticks[-1], ticks[-1]+0.1, 0.1))
+
+    fig.subplots_adjust(wspace=0.5)
+    fig.canvas.draw()
+
+    labels = [item.get_text() for item in ax1.get_yticklabels()]
+    labels[0] = "(less similar) " + labels[0]
+    labels[-1] = "(more similar) " + labels[-1]
+    ax1.set_yticklabels(labels)
+    labels = [item.get_text() for item in ax2.get_yticklabels()]
+    labels[0] = "(%s) " % attr2Name + labels[0]
+    labels[len(labels)//2] = "(neutral) 0.0"
+    labels[-1] = "(%s) " % attr1Name + labels[-1]
+    ax2.set_yticklabels(labels)
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -8,8 +8,8 @@ https://works.swarthmore.edu/dev-dhgrants/27/
 ## PREREQUISITE SKILLS
 
 This lab assignment requires familiarity with using the command-line in order to run programs.
-No programming skills are required.  The provided programs use `python3` and utilize the numpy library.
-
+No programming skills are required.  The provided programs use `python3` and utilize the `numpy` library.
+For the visualizations in `weatTest.py`, you will also need `pandas`, `seaborn` and `matplotlib`. 
 -------------
 
 ## SETUP
@@ -18,13 +18,13 @@ No programming skills are required.  The provided programs use `python3` and uti
 the [GloVe website](https://nlp.stanford.edu/projects/glove/). You can generate
 new models using the GloVe software, or download the pre-trained word vectors.
 
-2) Run `utilities.py` 
+2) Run `utilities.py`
 
    ```
    ./utilities.py GloVeFile npyFile
    ```
    where `GloVeFile` is the word vector model downloaded/created in the above
-   step. The numpy version of this data is output with name `npyFile`. 
+   step. The numpy version of this data is output with name `npyFile`.
    The output file should be placed in the `models` to be properly accessed by
    the main programs.
 
@@ -35,9 +35,9 @@ new models using the GloVe software, or download the pre-trained word vectors.
 There are two programs:
  * `findSimilarWords.py` - searches for the most related words to a query word
 using cosine similarity.
- * `weatTest.py` - performs the Word Embedding Association Tests described in: 
-  "Semantics derived automatically from language corpora contain human-like 
-  biases." Caliskan, Aylin; Bryson, Joanna J; Narayanan, Arvind. *Science*, 
+ * `weatTest.py` - performs the Word Embedding Association Tests described in:
+  "Semantics derived automatically from language corpora contain human-like
+  biases." Caliskan, Aylin; Bryson, Joanna J; Narayanan, Arvind. *Science*,
   Vol. 356, No. 6334, 14.04.2017, p. 183-186.
 
 -------------------------
@@ -82,8 +82,8 @@ model trained on the Twitter corpus.
 
 ### Measuring Word Embedding Assocations (`weatTest.py`)
 
-This program performs a similar test as the Caliskan et al. paper to calculate 
-the associations between concepts in our learned word embedding models. 
+This program performs a similar test as the Caliskan et al. paper to calculate
+the associations between concepts in our learned word embedding models.
 To run the program, provide, in order
   - the name of the word embedding model (e.g., twitter, web, or wikipedia)
   - the two *target* words (e.g, flowers and insects)
