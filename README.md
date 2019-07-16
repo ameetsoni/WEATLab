@@ -3,16 +3,18 @@ The assignment was part of Ethics and Technology - a first-year seminar.
 Additional materials, including assignment details, lecture slides, and a course syllabus are available here:
 
 https://works.swarthmore.edu/dev-dhgrants/28/
+
 https://works.swarthmore.edu/dev-dhgrants/27/
 
-## PREREQUISITE SKILLS
+## PREREQUISITE SKILLS ## 
 
 This lab assignment requires familiarity with using the command-line in order to run programs.
 No programming skills are required.  The provided programs use `python3` and utilize the `numpy` library.
 For the visualizations in `weatTest.py`, you will also need `pandas`, `seaborn` and `matplotlib`. 
+
 -------------
 
-## SETUP
+## SETUP ##
 
 1) Download the word embedding models of interest from
 the [GloVe website](https://nlp.stanford.edu/projects/glove/). You can generate
@@ -30,7 +32,7 @@ new models using the GloVe software, or download the pre-trained word vectors.
 
 
 -------------------------
-## MAIN PROGRAMS
+## MAIN PROGRAMS ##
 
 There are two programs:
  * `findSimilarWords.py` - searches for the most related words to a query word
@@ -42,7 +44,7 @@ using cosine similarity.
 
 -------------------------
 
-### Searching for similar words (`findSimilarWords.py`)
+### Searching for similar words (`findSimilarWords.py`) ###
 
 This program uses word embeddings to find the most similar words to a
 provided search word.  For the purpose of this assignment, this program is to
@@ -80,7 +82,7 @@ model trained on the Twitter corpus.
   ```
 --------------------
 
-### Measuring Word Embedding Assocations (`weatTest.py`)
+### Measuring Word Embedding Assocations (`weatTest.py`) ###
 
 This program performs a similar test as the Caliskan et al. paper to calculate
 the associations between concepts in our learned word embedding models.
