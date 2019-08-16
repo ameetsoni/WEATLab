@@ -68,7 +68,8 @@ def load_glove_vectors(infile):
         print("Error: vector file does not exist")
         print("Options are: ")
         for f in os.listdir(modeldir):
-            print(os.path.splitext(f)[0])
+            if(os.path.splitext(f)[1] == ".npy"):
+              print(os.path.splitext(f)[0])
         exit()
     fp = open(infile, 'rb')
     words = list(np.load(fp))
@@ -112,8 +113,10 @@ def closest_vectors(v, length, words, array, lengths, n):
 
 
 if __name__ == "__main__":
-    if(len(argv) != 3):
+    if len(argv) != 3:
         print("usage: utilities.py GloVeFile npyFile")
+    elif argv[2][-4:] != ".npy":
+        print("usage: npyFile must have an .npy extension")
     else:
         words, data = readGlove(argv[1])
         save_glove_vectors(argv[2],data,words)
