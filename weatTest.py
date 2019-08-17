@@ -173,17 +173,15 @@ def main():
     df["Target"] = [target1Name]*len(targ1SimDiff) + [target2Name]*len(targ2SimDiff)
     ax = sns.boxplot(x="Target", y="Difference", data=df, ax=ax2)
 
+    
     ticks = ax1.get_yticks()
-    if abs(ticks[0]) > ticks[-1]: #center axis at 0
-        ax1.yaxis.set_ticks(np.linspace(ticks[0], -ticks[0]+0.1, 0.1))
-    else:
-        ax1.yaxis.set_ticks(np.arange(-ticks[-1], ticks[-1]+0.1, 0.1))
-
+    mx = max(abs(ticks[0]),ticks[-1])
+    mx = int(mx*10+.99)/10.0
+    ax1.yaxis.set_ticks(np.arange(-mx,mx+.1,.1))
     ticks = ax2.get_yticks()
-    if abs(ticks[0]) > ticks[-1]: #center axis at 0
-        ax2.yaxis.set_ticks(np.linspace(ticks[0], -ticks[0]+0.1, 0.1))
-    else:
-        ax2.yaxis.set_ticks(np.arange(-ticks[-1], ticks[-1]+0.1, 0.1))
+    mx = max(abs(ticks[0]),ticks[-1])
+    mx = int(mx*10+.99)/10.0
+    ax2.yaxis.set_ticks(np.arange(-mx,mx+.1,.1))
 
     fig.subplots_adjust(wspace=0.5)
     fig.canvas.draw()
@@ -197,7 +195,7 @@ def main():
     labels[len(labels)//2] = "(neutral) 0.0"
     labels[-1] = "(%s) " % attr1Name + labels[-1]
     ax2.set_yticklabels(labels)
-
+    
     plt.show()
 
 
